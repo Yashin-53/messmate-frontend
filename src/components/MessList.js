@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 
 function MessList({ refresh }) {
@@ -15,28 +15,31 @@ function MessList({ refresh }) {
   const [location, setLocation] = useState("");
   const [searching, setSearching] = useState(false);
 
-  const fetchMesses = async (currentPage = page) => {
-    try {
-      setLoading(true);
-      setError("");
+  const fetchMesses = useCallback(
+    async (currentPage = page) => {
+      try {
+        setLoading(true);
+        setError("");
 
-      const response = await api.get(
-        `/messes?page=${currentPage}&limit=${limit}`
-      );
+        const response = await api.get(
+          `/messes?page=${currentPage}&limit=${limit}`
+        );
 
-      setMesses(response.data.messes || []);
-      setTotalPages(response.data.totalPages || 1);
-    } catch (error) {
-      console.error("GET /messes error:", error);
+        setMesses(response.data.messes || []);
+        setTotalPages(response.data.totalPages || 1);
+      } catch (error) {
+        console.error("GET /messes error:", error);
 
-      setError(
-        error.response?.data?.message ||
-          "Failed to fetch mess data."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+        setError(
+          error.response?.data?.message ||
+            "Failed to fetch mess data."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page, limit]
+  );
 
   const searchMesses = async () => {
     if (!location.trim()) {
@@ -71,7 +74,7 @@ function MessList({ refresh }) {
     if (!location.trim()) {
       fetchMesses(page);
     }
-  }, [page, refresh]);
+  }, [fetchMesses, page, refresh, location]);
 
   const handleClearSearch = () => {
     setLocation("");
@@ -85,12 +88,10 @@ function MessList({ refresh }) {
 
   return (
     <div className="mess-list">
-
       <h2>All Messes</h2>
 
       {/* Search */}
       <div className="search-section">
-
         <input
           type="text"
           placeholder="Search by location..."
@@ -110,7 +111,6 @@ function MessList({ refresh }) {
             Clear
           </button>
         )}
-
       </div>
 
       {error && (
@@ -124,18 +124,12 @@ function MessList({ refresh }) {
         <p>No messes found.</p>
       ) : (
         <ul>
-
           {messes.map((mess) => (
             <li key={mess._id}>
-
               <strong>{mess.name}</strong>
-
               {" - "}
-
               {mess.location}
-
               {" - ₹"}
-
               {mess.price}
 
               {mess.rating !== undefined && (
@@ -144,17 +138,14 @@ function MessList({ refresh }) {
                   {mess.rating}
                 </>
               )}
-
             </li>
           ))}
-
         </ul>
       )}
 
       {/* Pagination */}
       {!location && totalPages > 1 && (
         <div className="pagination">
-
           <button
             onClick={() => setPage((prev) => prev - 1)}
             disabled={page === 1}
@@ -172,10 +163,8 @@ function MessList({ refresh }) {
           >
             Next
           </button>
-
         </div>
       )}
-
     </div>
   );
 }
