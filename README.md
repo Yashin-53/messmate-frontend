@@ -1,70 +1,365 @@
-# Getting Started with Create React App
+# 🍱 MessMate
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**MessMate** is a full-stack MERN application that helps students discover, manage, and explore mess/food listings.
 
-## Available Scripts
+The project demonstrates a complete production-style workflow using **React, Node.js, Express, MongoDB, JWT authentication, Axios, and REST APIs**.
 
-In the project directory, you can run:
+## 🚀 Live Demo
 
-### `npm start`
+* **Frontend:** https://messmate-frontend-rwaw.onrender.com
+* **Backend API:** https://messmate-backend-ntvv.onrender.com
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## ✨ Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🔐 Authentication
 
-### `npm test`
+* User registration
+* User login
+* Password hashing with bcrypt
+* JWT-based authentication
+* Protected backend routes
+* Protected React routes
+* Logout functionality
+* Token persistence using localStorage
+* Automatic Authorization header using Axios interceptor
+* Login/signup loading states
+* Password validation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🍱 Mess Management
 
-### `npm run build`
+* Create a new mess listing
+* View mess listings
+* View individual mess details
+* Search messes by location
+* Update mess details
+* Delete mess listings
+* Pagination support
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 🛡️ Security
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* JWT authentication
+* Protected `/messes` API
+* Protected `/profile` API
+* Helmet security headers
+* Rate limiting
+* MongoDB input sanitization
+* XSS protection
+* CORS configuration
+* Environment variables for secrets
+* HTTPS on production deployment
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### ⚡ Performance & Production
 
-### `npm run eject`
+* Response compression
+* Centralized error handling
+* HTTP request logging with Morgan
+* Environment-based logging
+* MongoDB Atlas production database
+* Production React build
+* Render deployment
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🏗️ Architecture
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```text
+                    ┌──────────────────────┐
+                    │     React Frontend   │
+                    │      Netlify/Render   │
+                    └──────────┬───────────┘
+                               │
+                         Axios / REST API
+                               │
+                    Authorization: Bearer JWT
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │  Node.js + Express   │
+                    │      Backend API     │
+                    └──────────┬───────────┘
+                               │
+                    ┌──────────┴───────────┐
+                    │                      │
+              JWT Authentication      Mess APIs
+                    │                      │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     MongoDB Atlas     │
+                    │       Database        │
+                    └──────────────────────┘
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📁 Project Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Frontend
 
-## Learn More
+```text
+messmate-frontend/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── AddMessForm.js
+│   │   ├── LoginForm.js
+│   │   ├── SignupForm.js
+│   │   ├── Navbar.js
+│   │   ├── MessList.js
+│   │   └── ProtectedRoute.js
+│   │
+│   ├── context/
+│   │   └── AuthContext.js
+│   │
+│   ├── pages/
+│   │   ├── Home.js
+│   │   ├── Dashboard.js
+│   │   └── Profile.js
+│   │
+│   ├── services/
+│   │   └── api.js
+│   │
+│   ├── axiosConfig.js
+│   └── App.js
+│
+├── package.json
+└── .gitignore
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Backend
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```text
+messmate-api/
+├── middleware/
+│   ├── authMiddleware.js
+│   └── validateObjectId.js
+│
+├── models/
+│   ├── Mess.js
+│   └── User.js
+│
+├── routes/
+│   ├── auth.js
+│   ├── messRoutes.js
+│   └── profile.js
+│
+├── index.js
+├── package.json
+└── .gitignore
+```
 
-### Code Splitting
+## 🔑 Authentication Flow
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```text
+User
+ │
+ │ Register
+ ▼
+POST /auth/register
+ │
+ ▼
+Password hashed using bcrypt
+ │
+ ▼
+MongoDB
+```
 
-### Analyzing the Bundle Size
+```text
+User
+ │
+ │ Login
+ ▼
+POST /auth/login
+ │
+ ▼
+Credentials verified
+ │
+ ▼
+JWT generated
+ │
+ ▼
+React stores token
+ │
+ ▼
+Axios interceptor
+ │
+ ▼
+Authorization: Bearer <token>
+ │
+ ▼
+Protected API
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📡 API Endpoints
 
-### Making a Progressive Web App
+### Authentication
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+| Method | Endpoint         | Access |
+| ------ | ---------------- | ------ |
+| POST   | `/auth/register` | Public |
+| POST   | `/auth/login`    | Public |
 
-### Advanced Configuration
+### Profile
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+| Method | Endpoint   | Access       |
+| ------ | ---------- | ------------ |
+| GET    | `/profile` | 🔒 Protected |
+
+### Mess
+
+| Method | Endpoint         | Access       |
+| ------ | ---------------- | ------------ |
+| GET    | `/messes`        | 🔒 Protected |
+| GET    | `/messes/search` | 🔒 Protected |
+| GET    | `/messes/:id`    | 🔒 Protected |
+| POST   | `/messes`        | 🔒 Protected |
+| PUT    | `/messes/:id`    | 🔒 Protected |
+| DELETE | `/messes/:id`    | 🔒 Protected |
+
+## 🧰 Technologies
+
+### Frontend
+
+* React.js
+* React Router
+* Axios
+* React Context API
+* JavaScript
+* HTML/CSS
+
+### Backend
+
+* Node.js
+* Express.js
+* Mongoose
+* JWT
+* bcryptjs
+* Morgan
+* Helmet
+* express-rate-limit
+* compression
+
+### Database
+
+* MongoDB
+* MongoDB Atlas
+* MongoDB Compass
 
 ### Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+* Render
+* Netlify
+* MongoDB Atlas
 
-### `npm run build` fails to minify
+## ⚙️ Environment Variables
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Backend `.env`
+
+```env
+PORT=10000
+MONGO_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_secure_jwt_secret
+NODE_ENV=production
+```
+
+### Frontend `.env`
+
+```env
+REACT_APP_API_BASE_URL=your_backend_url
+```
+
+> Never commit `.env` files or expose JWT secrets and database credentials.
+
+## 💻 Run Locally
+
+### Backend
+
+```bash
+cd messmate-api
+npm install
+npm start
+```
+
+Backend will run on:
+
+```text
+http://localhost:4000
+```
+
+### Frontend
+
+```bash
+cd messmate-frontend
+npm install
+npm start
+```
+
+Frontend will run on:
+
+```text
+http://localhost:3001
+```
+
+## 🧪 Testing
+
+The API can be tested using:
+
+* Thunder Client
+* Postman
+* Browser
+* React frontend
+
+Example login request:
+
+```http
+POST /auth/login
+Content-Type: application/json
+```
+
+```json
+{
+  "username": "your_username",
+  "password": "your_password"
+}
+```
+
+## 🛡️ Production Security
+
+The application includes:
+
+* JWT authentication
+* Password hashing
+* Protected API routes
+* CORS
+* Helmet
+* Rate limiting
+* XSS protection
+* MongoDB sanitization
+* HTTPS deployment
+* Environment variables
+* Centralized error handling
+
+## 📈 Future Improvements
+
+* Role-based authorization
+* Admin dashboard
+* Mess reviews and ratings
+* Image uploads
+* Favorite messes
+* Advanced filtering
+* Google Maps integration
+* Email verification
+* Password reset
+* Refresh tokens
+* Redis caching
+* Automated testing
+* CI/CD pipeline
+
+## 👨‍💻 Author
+
+**Yashin Ansari**
+
+B.Tech Information Technology
+
+CSJMU Kanpur
+
+---
+
+⭐ If you find this project useful, consider giving the repository a star!
