@@ -9,11 +9,26 @@ function MessList({ refresh }) {
 
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
-
   const [totalPages, setTotalPages] = useState(1);
 
   const [location, setLocation] = useState("");
   const [searching, setSearching] = useState(false);
+
+  // Edit state
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    location: "",
+    price: "",
+    rating: "",
+  });
+
+  const [updating, setUpdating] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  // ========================================
+  // FETCH MESSES
+  // ========================================
 
   const fetchMesses = useCallback(
     async (currentPage = page) => {
@@ -40,6 +55,10 @@ function MessList({ refresh }) {
     },
     [page, limit]
   );
+
+  // ========================================
+  // SEARCH MESSES
+  // ========================================
 
   const searchMesses = async () => {
     if (!location.trim()) {
@@ -70,17 +89,161 @@ function MessList({ refresh }) {
     }
   };
 
+  // ========================================
+  // LOAD MESSES
+  // ========================================
+
   useEffect(() => {
     if (!location.trim()) {
       fetchMesses(page);
     }
   }, [fetchMesses, page, refresh, location]);
 
+  // ========================================
+  // CLEAR SEARCH
+  // ========================================
+
   const handleClearSearch = () => {
     setLocation("");
     setPage(1);
     fetchMesses(1);
   };
+
+  // ========================================
+  // START EDIT
+  // ========================================
+
+  const handleEdit = (mess) => {
+    setEditingId(mess._id);
+
+    setEditForm({
+      name: mess.name || "",
+      location: mess.location || "",
+      price: mess.price || "",
+      rating: mess.rating ?? "",
+    });
+
+    setError("");
+  };
+
+  // ========================================
+  // CANCEL EDIT
+  // ========================================
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+
+    setEditForm({
+      name: "",
+      location: "",
+      price: "",
+      rating: "",
+    });
+  };
+
+  // ========================================
+  // EDIT INPUT CHANGE
+  // ========================================
+
+  const handleEditChange = (e) => {
+    setEditForm({
+      ...editForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ========================================
+  // UPDATE MESS
+  // PUT /messes/:id
+  // ========================================
+
+  const handleUpdate = async (id) => {
+    if (
+      !editForm.name.trim() ||
+      !editForm.location.trim() ||
+      editForm.price === ""
+    ) {
+      setError("Name, location and price are required.");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setError("");
+
+      const response = await api.put(`/messes/${id}`, {
+        name: editForm.name.trim(),
+        location: editForm.location.trim(),
+        price: Number(editForm.price),
+        rating:
+          editForm.rating === ""
+            ? undefined
+            : Number(editForm.rating),
+      });
+
+      setMesses((prevMesses) =>
+        prevMesses.map((mess) =>
+          mess._id === id ? response.data : mess
+        )
+      );
+
+      handleCancelEdit();
+    } catch (error) {
+      console.error("PUT /messes error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Failed to update mess."
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // ========================================
+  // DELETE MESS
+  // DELETE /messes/:id
+  // ========================================
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this mess?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingId(id);
+      setError("");
+
+      await api.delete(`/messes/${id}`);
+
+      setMesses((prevMesses) =>
+        prevMesses.filter((mess) => mess._id !== id)
+      );
+
+      if (messes.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
+      } else {
+        fetchMesses(page);
+      }
+    } catch (error) {
+      console.error("DELETE /messes error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Failed to delete mess."
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ========================================
+  // LOADING
+  // ========================================
 
   if (loading) {
     return <p>Loading messes...</p>;
@@ -113,6 +276,7 @@ function MessList({ refresh }) {
         )}
       </div>
 
+      {/* Error */}
       {error && (
         <p className="error-message">
           {error}
@@ -126,17 +290,117 @@ function MessList({ refresh }) {
         <ul>
           {messes.map((mess) => (
             <li key={mess._id}>
-              <strong>{mess.name}</strong>
-              {" - "}
-              {mess.location}
-              {" - ₹"}
-              {mess.price}
+              {editingId === mess._id ? (
+                /* ========================================
+                   EDIT MODE
+                   ======================================== */
+                <div className="edit-mess-form">
+                  <h3>Edit Mess</h3>
 
-              {mess.rating !== undefined && (
-                <>
-                  {" - Rating: "}
-                  {mess.rating}
-                </>
+                  <div>
+                    <label>Mess Name</label>
+
+                    <input
+                      type="text"
+                      name="name"
+                      value={editForm.name}
+                      onChange={handleEditChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label>Location</label>
+
+                    <input
+                      type="text"
+                      name="location"
+                      value={editForm.location}
+                      onChange={handleEditChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label>Monthly Price (₹)</label>
+
+                    <input
+                      type="number"
+                      name="price"
+                      value={editForm.price}
+                      onChange={handleEditChange}
+                      min="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label>Rating</label>
+
+                    <input
+                      type="number"
+                      name="rating"
+                      value={editForm.rating}
+                      onChange={handleEditChange}
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      placeholder="0 - 5"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => handleUpdate(mess._id)}
+                    disabled={updating}
+                  >
+                    {updating ? "Saving..." : "Save Changes"}
+                  </button>
+
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={updating}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                /* ========================================
+                   NORMAL VIEW
+                   ======================================== */
+                <div className="mess-item">
+                  <div className="mess-info">
+                    <strong>{mess.name}</strong>
+
+                    <span>
+                      Location: {mess.location}
+                    </span>
+
+                    <span>
+                      Monthly Price: ₹{mess.price}
+                    </span>
+
+                    {mess.rating !== undefined &&
+                      mess.rating !== null && (
+                        <span>
+                          Rating: ⭐ {mess.rating}
+                        </span>
+                      )}
+                  </div>
+
+                  <div className="mess-actions">
+                    <button
+                      onClick={() => handleEdit(mess)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(mess._id)}
+                      disabled={deletingId === mess._id}
+                    >
+                      {deletingId === mess._id
+                        ? "Deleting..."
+                        : "Delete"}
+                    </button>
+                  </div>
+                </div>
               )}
             </li>
           ))}
@@ -147,7 +411,9 @@ function MessList({ refresh }) {
       {!location && totalPages > 1 && (
         <div className="pagination">
           <button
-            onClick={() => setPage((prev) => prev - 1)}
+            onClick={() =>
+              setPage((prev) => prev - 1)
+            }
             disabled={page === 1}
           >
             Previous
@@ -158,7 +424,9 @@ function MessList({ refresh }) {
           </span>
 
           <button
-            onClick={() => setPage((prev) => prev + 1)}
+            onClick={() =>
+              setPage((prev) => prev + 1)
+            }
             disabled={page === totalPages}
           >
             Next
