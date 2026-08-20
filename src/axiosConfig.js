@@ -10,11 +10,11 @@ const axiosInstance = axios.create({
 
 // ========================================
 // REQUEST INTERCEPTOR
-// Automatically attach JWT
 // ========================================
 
 axiosInstance.interceptors.request.use(
   (config) => {
+
     const token = localStorage.getItem("token");
 
     if (token) {
@@ -23,6 +23,7 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
+
   (error) => {
     return Promise.reject(error);
   }
@@ -31,14 +32,16 @@ axiosInstance.interceptors.request.use(
 
 // ========================================
 // RESPONSE INTERCEPTOR
-// Handle expired/invalid JWT
 // ========================================
 
 axiosInstance.interceptors.response.use(
+
   (response) => response,
 
   (error) => {
+
     if (error.response?.status === 401) {
+
       localStorage.removeItem("token");
 
       window.location.href = "/login";
@@ -47,5 +50,6 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default axiosInstance;
